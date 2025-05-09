@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TC 카드 정품 인증 결과</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(#0b3c57, #0b1c2c);
+      background-image: url('background_final_v2.png');
+      background-size: cover;
+      background-position: center;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.75);
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
+      padding: 30px 40px;
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+    }
+    .lock {
+      font-size: 50px;
+      margin-bottom: 10px;
+    }
+    .status {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .desc {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .footer {
+      font-size: 14px;
+      margin-top: 20px;
+      color: #ccc;
+    }
+    .footer strong {
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="lock">🔒</div>
+    <div class="status" id="statusText">정품입니다.</div>
+    <div class="desc" id="descText">
+      본 카드는 블록체인에 등록된 고유 식별자(UUID)를 기반으로 발급됩니다.<br />
+      인증은 최대 <strong id="maxCount">3</strong>회까지 가능하며,<br />
+      마지막 인증 시간: <span id="lastVerified">2025-05-10 07:55:00</span><br />
+      현재 인증 횟수: <span id="verifyCount">1</span>회
+    </div>
+    <div class="footer">
+      🔐 정품 보증: 블록체인 기반 인증 시스템<br />
+      <strong>제품문의: 010-8455-8777</strong>
+    </div>
+  </div>
+  <script>
+    // 예시: 상태 설정
+    const status = "valid"; // "valid", "invalid", "exceeded"
+    const statusText = document.getElementById("statusText");
+    const descText = document.getElementById("descText");
+
+    if (status === "invalid") {
+      statusText.textContent = "❌ 정품이 아닙니다.";
+      descText.innerHTML = "이 카드는 정품으로 인증되지 않았습니다.";
+    } else if (status === "exceeded") {
+      statusText.textContent = "⚠ 인증 횟수를 초과했습니다.";
+      descText.innerHTML = "이 카드는 최대 인증 가능 횟수를 초과하였습니다.<br />" +
+                           "최근 인증 기록 시간: <strong>2025-05-10 07:55:00</strong><br />" +
+                           "누적 인증: <strong>3</strong>회";
+    }
+  </script>
+</body>
+</html>
