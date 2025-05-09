@@ -1,108 +1,79 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TC 카드 정품 인증</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f2f2;
-      text-align: center;
-      padding: 2rem;
-    }
-    .card {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
-    }
-    .status {
-      font-size: 1.5rem;
-      margin-top: 1rem;
-    }
-    .info {
-      margin-top: 1rem;
-      font-size: 0.95rem;
-      color: #555;
-    }
-    .footer {
-      margin-top: 2rem;
-      font-size: 0.85rem;
-      color: #777;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TC 카드 정품 인증</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(6.5px);
+        }
+
+        .card h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card .result {
+            font-size: 20px;
+            color: #ff4e4e;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            font-size: 14px;
+            color: #ccc;
+            margin-top: 30px;
+        }
+
+        .contact {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h2>🔑 TC 카드 정품 인증 결과</h2>
-    <div class="status" id="result">로딩 중...</div>
-    <div class="info" id="logInfo"></div>
-    <div class="footer">
-      <p><strong>🔐 정품 보증: 블록체인 기반 인증 시스템</strong><br/>
-      본 카드는 블록체인에 등록된 고유 식별자(UUID)를 기반으로 발급됩니다.<br/>
-      인증은 <strong>최대 3회</strong>까지 가능하며, 복제 방지 및 정품 추적을 위해<br/>
-      인증 기록이 자동 저장됩니다.</p>
+    <div class="card">
+        <div class="icon">🔒</div>
+        <h1>TC 카드 정품 인증 결과</h1>
+        <div class="result">❌ 유효하지 않은 접근입니다.</div>
+        <p>본 카드는 블록체인에 등록된 고유 식별자(UUID)를 기반으로 발급됩니다.<br>
+           인증은 최대 <strong>3회</strong>까지 가능하며, 복제 방지 및 정품 추적을 위해 인증 기록이 자동 저장됩니다.</p>
+        <div class="info">
+            🔐 정품 보증: 블록체인 기반 인증 시스템<br>
+            <div class="contact">제품문의: 010-8455-8777</div>
+        </div>
     </div>
-  </div>
-
-  <script>
-    const validUUIDs = ["4AFn1TN8"];
-    const MAX_ATTEMPTS = 3;
-
-    function getQueryParam(param) {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get(param);
-    }
-
-    function getLogs(uuid) {
-      const logKey = `authlog_${uuid}`;
-      let logs = localStorage.getItem(logKey);
-      return logs ? JSON.parse(logs) : [];
-    }
-
-    function addLog(uuid) {
-      const logKey = `authlog_${uuid}`;
-      const logs = getLogs(uuid);
-      const now = new Date().toLocaleString();
-      logs.push(now);
-      localStorage.setItem(logKey, JSON.stringify(logs));
-      return logs;
-    }
-
-    function renderResult(uuid) {
-      const resultDiv = document.getElementById("result");
-      const logDiv = document.getElementById("logInfo");
-      const logs = getLogs(uuid);
-
-      if (!validUUIDs.includes(uuid)) {
-        resultDiv.innerHTML = `❌ 등록되지 않은 카드입니다.`;
-        resultDiv.style.color = "red";
-        return;
-      }
-
-      if (logs.length >= MAX_ATTEMPTS) {
-        resultDiv.innerHTML = `⚠️ 인증 횟수를 초과했습니다.`;
-        resultDiv.style.color = "orange";
-        logDiv.innerHTML = `인증 기록 (${MAX_ATTEMPTS}회 초과):<br/>` + logs.map((t, i) => `${i+1}회: ${t}`).join("<br/>");
-        return;
-      }
-
-      const updatedLogs = addLog(uuid);
-      resultDiv.innerHTML = `✅ 정품 카드입니다.`;
-      resultDiv.style.color = "green";
-      logDiv.innerHTML = `인증 기록 (${updatedLogs.length}/${MAX_ATTEMPTS}회):<br/>` + updatedLogs.map((t, i) => `${i+1}회: ${t}`).join("<br/>");
-    }
-
-    const uuid = getQueryParam("uuid");
-    if (uuid) {
-      renderResult(uuid);
-    } else {
-      document.getElementById("result").innerText = "❌ 유효하지 않은 접근입니다.";
-      document.getElementById("result").style.color = "red";
-    }
-  </script>
 </body>
 </html>
