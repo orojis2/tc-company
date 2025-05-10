@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.4.6/dist/ethers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
     <meta charset="UTF-8">
@@ -86,7 +86,11 @@
         }
 
         // 페이지 로드 시 자동 연결 시도
-        window.addEventListener("load", connectWallet);
+        window.addEventListener("load", () => {
+            if (window.ethereum) {
+                connectWallet();
+            }
+        });
     </script>
 
     <div class="container">
