@@ -56,6 +56,35 @@
         }
     </style>
 </head>
+    <script>
+  // MetaMask와 연결
+  async function connectWallet() {
+    if (typeof window.ethereum === "undefined") {
+      alert("MetaMask가 설치되어 있지 않습니다.");
+      return;
+    }
+
+    try {
+      await ethereum.request({ method: "eth_requestAccounts" });
+      console.log("🦊 MetaMask 지갑 연결됨");
+
+      // provider와 signer 설정
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contractAddress = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4
+      window.tcProvider = provider;
+      window.tcSigner = signer;
+
+      alert("지갑 연결 성공!");
+    } catch (err) {
+      alert("지갑 연결 실패: " + err.message);
+    }
+  }
+
+  // 페이지 로드 시 자동 연결 시도
+  window.addEventListener("load", connectWallet);
+</script>
+
 <body>
     <div class="container">
         <h1>TC CARD 정품 인증</h1>
@@ -73,6 +102,103 @@
         </div>
     </div>
     <script>
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "uuid",
+				"type": "string"
+			}
+		],
+		"name": "markAsVerified",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "uuid",
+				"type": "string"
+			}
+		],
+		"name": "registerUUID",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "uuid",
+				"type": "string"
+			}
+		],
+		"name": "removeUUID",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "uuid",
+				"type": "string"
+			}
+		],
+		"name": "getVerificationTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "uuid",
+				"type": "string"
+			}
+		],
+		"name": "verifyUUID",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
         let verified = false;
         let verifiedTime = "";
 
@@ -84,20 +210,46 @@
             const timestamp = now.toLocaleString();
 
             // Placeholder blockchain verification (to be replaced with actual smart contract call)
-            if (uuid === "VALID-UUID-EXAMPLE") {
-                if (!verified) {
-                    verified = true;
-                    verifiedTime = timestamp;
-                    resultBox.innerText = "✔ 정품입니다.";
-                    logBox.innerText = "최초 인증 시각: " + verifiedTime;
-                } else {
-                    resultBox.innerText = "이미 인증된 카드입니다.";
-                    logBox.innerText = "최초 인증 시각: " + verifiedTime;
-                }
-            } else {
-                resultBox.innerText = "✖ 정품이 아닙니다.";
-                logBox.innerText = "";
-            }
+           async function verifyUUID() {
+    const uuid = document.getElementById('uuid').value.trim();
+    const resultBox = document.getElementById('resultText');
+    const logBox = document.getElementById('logBox');
+
+    if (!uuid) {
+        resultBox.innerText = "UUID를 입력해주세요.";
+        return;
+    }
+
+    try {
+        const contract = new ethers.Contract(
+            "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", // 실제 배포 주소
+            contractABI,
+            window.tcSigner
+        );
+
+        const isVerified = await contract.verifyUUID(uuid);
+
+        if (isVerified) {
+            const timestamp = await contract.getVerificationTime(uuid);
+            const date = new Date(Number(timestamp) * 1000);
+            resultBox.innerText = "이미 인증된 카드입니다.";
+            logBox.innerText = "최초 인증 시각: " + date.toLocaleString();
+        } else {
+            const tx = await contract.markAsVerified(uuid);
+            await tx.wait();
+
+            const newTimestamp = await contract.getVerificationTime(uuid);
+            const verifiedDate = new Date(Number(newTimestamp) * 1000);
+            resultBox.innerText = "✔ 정품입니다.";
+            logBox.innerText = "최초 인증 시각: " + verifiedDate.toLocaleString();
+        }
+    } catch (err) {
+        console.error(err);
+        resultBox.innerText = "⚠ 오류 발생: " + err.message;
+        logBox.innerText = "";
+    }
+}
+
         }
     </script>
 </body>
