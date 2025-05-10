@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>TC COMPANY 정품 인증</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #00ffff;
+            text-shadow: 1px 1px 2px black;
+        }
+        .container {
+            margin-top: 100px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #00ffff;
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .log, .result, .note {
+            margin-top: 20px;
+            font-size: 1em;
+            color: white;
+        }
+        .note {
+            font-size: 0.9em;
+            color: #cccccc;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TC COMPANY 정품 인증</h1>
+        <input type="text" id="uuid" placeholder="UUID를 입력하세요">
+        <button onclick="verifyUUID()">정품 확인</button>
+        <div class="result" id="resultText"></div>
+        <div class="log" id="logBox"></div>
+        <div class="note">
+            이 시스템은 <strong>이더리움을 기반으로 한 Polygon 체인</strong>을 사용하여
+            제품의 고유 UUID를 <strong>블록체인에 등록</strong>하고, 누구나 변조되지 않은 데이터를 통해
+            <strong>정품 여부를 실시간으로 확인</strong>할 수 있도록 설계되었습니다.
+            <br><br>
+            블록체인은 데이터를 변경할 수 없는 구조이기 때문에, 등록된 정보는 신뢰할 수 있으며,
+            <strong>위조 방지</strong>에 탁월한 효과를 가집니다.
+        </div>
+    </div>
+    <script>
+        let attemptCount = 0;
+        const maxAttempts = 3;
+        const logs = [];
+
+        function verifyUUID() {
+            const uuid = document.getElementById('uuid').value.trim();
+            const resultBox = document.getElementById('resultText');
+            const logBox = document.getElementById('logBox');
+
+            if (attemptCount >= maxAttempts) {
+                resultBox.innerText = "⚠ 인증횟수를 초과하였습니다.";
+                return;
+            }
+
+            const now = new Date();
+            const timestamp = now.toLocaleString();
+            attemptCount++;
+            logs.push(`${attemptCount}차 인증 시도: ${timestamp}`);
+            logBox.innerHTML = logs.join("<br>");
+
+            // Placeholder blockchain verification (to be replaced with actual smart contract call)
+            if (uuid === "VALID-UUID-EXAMPLE") {
+                resultBox.innerText = "✔ 정품입니다.";
+            } else {
+                resultBox.innerText = "✖ 정품이 아닙니다.";
+            }
+        }
+    </script>
+</body>
+</html>
