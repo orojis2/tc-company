@@ -1,168 +1,166 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>TC CARD 정품 인증</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            background-image: url('background.jpg');
-            background-size: cover;
-            background-position: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #00ffff;
-            text-shadow: 1px 1px 2px black;
-        }
-        .container {
-            margin-top: 100px;
-            background-color: rgba(0, 0, 0, 0.6);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-        }
-        input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            font-size: 1em;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: none;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 1em;
-            background-color: #00ffff;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-        .log, .result, .note {
-            margin-top: 20px;
-            font-size: 1em;
-            color: white;
-        }
-        .note {
-            font-size: 0.9em;
-            color: #cccccc;
-            max-width: 600px;
-        }
-        #qrcode {
-            margin-top: 30px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>TC CARD 정품 인증</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #00ffff;
+      text-shadow: 1px 1px 2px black;
+    }
+    .container {
+      margin-top: 100px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      font-size: 1em;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #00ffff;
+      color: black;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .log, .result, .note {
+      margin-top: 20px;
+      font-size: 1em;
+      color: white;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #cccccc;
+      max-width: 600px;
+    }
+    #qrcode {
+      margin-top: 30px;
+    }
+  </style>
 </head>
-
 <body>
-    <script>
-        const contractAddress = "0x8BF2B912B83eC7C93e4665Eb33E8EA6533dF6a6D";
+  <script>
+    const contractAddress = "0x8BF2B912B83eC7C93e4665Eb33E8EA6533dF6a6D";
+    const contractABI = [
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "addUUID",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "removeUUID",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "verify",
+        "outputs": [
+          { "internalType": "bool", "name": "isValid", "type": "bool" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
 
-        const contractABI = [
-            {
-                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
-                "name": "addUUID",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
-                "name": "removeUUID",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
-                "name": "verify",
-                "outputs": [
-                    { "internalType": "bool", "name": "isValid", "type": "bool" },
-                    { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ];
+    async function connectWallet() {
+      if (typeof window.ethereum === "undefined") {
+        alert("MetaMask가 설치되어 있지 않습니다.");
+        return;
+      }
 
-        async function connectWallet() {
-            if (typeof window.ethereum === "undefined") {
-                alert("MetaMask가 설치되어 있지 않습니다.");
-                return;
-            }
+      try {
+        await ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        window.tcProvider = provider;
+        window.tcSigner = signer;
+        console.log("🦊 MetaMask 지갑 연결됨");
+      } catch (err) {
+        alert("지갑 연결 실패: " + err.message);
+      }
+    }
 
-            try {
-                await ethereum.request({ method: "eth_requestAccounts" });
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const signer = provider.getSigner();
-                window.tcProvider = provider;
-                window.tcSigner = signer;
-                console.log("🦊 MetaMask 지갑 연결됨");
-            } catch (err) {
-                alert("지갑 연결 실패: " + err.message);
-            }
+    window.addEventListener("load", connectWallet);
+
+    async function verifyUUID() {
+      const uuid = document.getElementById('uuid').value.trim();
+      const resultBox = document.getElementById('resultText');
+      const logBox = document.getElementById('logBox');
+
+      if (uuid.length !== 6) {
+        resultBox.innerText = "UUID는 6자리만 입력 가능합니다.";
+        return;
+      }
+
+      try {
+        const contract = new ethers.Contract(contractAddress, contractABI, window.tcSigner);
+        const [isValid, timestamp] = await contract.verify(uuid);
+
+        if (isValid) {
+          const date = new Date(Number(timestamp) * 1000);
+          resultBox.innerText = "✔ 정품입니다.";
+          logBox.innerText = "최초 인증 시각: " + date.toLocaleString();
+        } else {
+          resultBox.innerText = "❌ 정품이 아닙니다.";
+          logBox.innerText = "";
         }
+      } catch (err) {
+        resultBox.innerText = "⚠ 오류 발생: " + err.message;
+        logBox.innerText = "";
+      }
+    }
 
-        window.addEventListener("load", connectWallet);
+    function generateQRCode(uuid) {
+      const url = `https://yourwebsite.com?uuid=${uuid}`;
+      QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
+        if (error) console.error(error);
+        console.log('QR 코드 생성 완료');
+      });
+    }
 
-        async function verifyUUID() {
-            const uuid = document.getElementById('uuid').value.trim();
-            const resultBox = document.getElementById('resultText');
-            const logBox = document.getElementById('logBox');
+    generateQRCode("AB1234");
+  </script>
 
-            if (uuid.length !== 6) {
-                resultBox.innerText = "UUID는 6자리만 입력 가능합니다.";
-                return;
-            }
-
-            try {
-                const contract = new ethers.Contract(contractAddress, contractABI, window.tcSigner);
-                const [isValid, timestamp] = await contract.verify(uuid);
-
-                if (isValid) {
-                    const date = new Date(Number(timestamp) * 1000);
-                    resultBox.innerText = "✔ 정품입니다.";
-                    logBox.innerText = "최초 인증 시각: " + date.toLocaleString();
-                } else {
-                    resultBox.innerText = "❌ 정품이 아닙니다.";
-                    logBox.innerText = "";
-                }
-            } catch (err) {
-                resultBox.innerText = "⚠ 오류 발생: " + err.message;
-                logBox.innerText = "";
-            }
-        }
-
-        function generateQRCode(uuid) {
-            const url = `https://yourwebsite.com?uuid=${uuid}`;
-            QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
-                if (error) console.error(error);
-                console.log('QR 코드 생성 완료');
-            });
-        }
-
-        generateQRCode("AB1234");
-    </script>
-
-    <div class="container">
-        <h1>TC CARD 정품 인증</h1>
-        <input type="text" id="uuid" placeholder="6자리 UUID를 입력하세요" maxlength="6">
-        <button onclick="verifyUUID()">정품 확인</button>
-        <div class="result" id="resultText"></div>
-        <div class="log" id="logBox"></div>
-        <div class="note">
-            이 시스템은 <strong>Polygon 블록체인</strong>을 기반으로 동작하며,
-            UUID를 등록하고 정품 여부를 검증할 수 있습니다.
-            블록체인에 등록된 정보는 <strong>위변조가 불가능</strong>하며,
-            실시간으로 정품 여부를 확인할 수 있습니다.
-        </div>
-        <div id="qrcode"></div>
+  <div class="container">
+    <h1>TC CARD 정품 인증</h1>
+    <input type="text" id="uuid" placeholder="6자리 UUID를 입력하세요" maxlength="6">
+    <button onclick="verifyUUID()">정품 확인</button>
+    <div class="result" id="resultText"></div>
+    <div class="log" id="logBox"></div>
+    <div class="note">
+      이 시스템은 <strong>Polygon 블록체인</strong>을 기반으로 동작하며,
+      UUID를 등록하고 정품 여부를 검증할 수 있습니다.
+      블록체인에 등록된 정보는 <strong>위변조가 불가능</strong>하며,
+      실시간으로 정품 여부를 확인할 수 있습니다.
     </div>
+    <div id="qrcode"></div>
+  </div>
 </body>
 </html>
 
