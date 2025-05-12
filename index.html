@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- ethers.js를 require 방식으로 사용 -->
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
     <meta charset="UTF-8">
     <title>TC CARD 정품 인증</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -63,7 +61,35 @@
 
 <body>
     <script>
-        // MetaMask와 연결
+        const contractAddress = "0x8BF2B912B83eC7C93e4665Eb33E8EA6533dF6a6D";
+
+        const contractABI = [
+            {
+                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+                "name": "addUUID",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+                "name": "removeUUID",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+                "name": "verify",
+                "outputs": [
+                    { "internalType": "bool", "name": "isValid", "type": "bool" },
+                    { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
         async function connectWallet() {
             if (typeof window.ethereum === "undefined") {
                 alert("MetaMask가 설치되어 있지 않습니다.");
@@ -72,22 +98,55 @@
 
             try {
                 await ethereum.request({ method: "eth_requestAccounts" });
-                console.log("🦊 MetaMask 지갑 연결됨");
-
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
-                const contractAddress = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4"; // 계약 주소
                 window.tcProvider = provider;
                 window.tcSigner = signer;
-
-                alert("지갑 연결 성공!");
+                console.log("🦊 MetaMask 지갑 연결됨");
             } catch (err) {
                 alert("지갑 연결 실패: " + err.message);
             }
         }
 
-        // 페이지 로드 시 자동 연결 시도
         window.addEventListener("load", connectWallet);
+
+        async function verifyUUID() {
+            const uuid = document.getElementById('uuid').value.trim();
+            const resultBox = document.getElementById('resultText');
+            const logBox = document.getElementById('logBox');
+
+            if (uuid.length !== 6) {
+                resultBox.innerText = "UUID는 6자리만 입력 가능합니다.";
+                return;
+            }
+
+            try {
+                const contract = new ethers.Contract(contractAddress, contractABI, window.tcSigner);
+                const [isValid, timestamp] = await contract.verify(uuid);
+
+                if (isValid) {
+                    const date = new Date(Number(timestamp) * 1000);
+                    resultBox.innerText = "✔ 정품입니다.";
+                    logBox.innerText = "최초 인증 시각: " + date.toLocaleString();
+                } else {
+                    resultBox.innerText = "❌ 정품이 아닙니다.";
+                    logBox.innerText = "";
+                }
+            } catch (err) {
+                resultBox.innerText = "⚠ 오류 발생: " + err.message;
+                logBox.innerText = "";
+            }
+        }
+
+        function generateQRCode(uuid) {
+            const url = `https://yourwebsite.com?uuid=${uuid}`;
+            QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
+                if (error) console.error(error);
+                console.log('QR 코드 생성 완료');
+            });
+        }
+
+        generateQRCode("AB1234");
     </script>
 
     <div class="container">
@@ -97,126 +156,13 @@
         <div class="result" id="resultText"></div>
         <div class="log" id="logBox"></div>
         <div class="note">
-            이 시스템은 <strong>이더리움을 기반으로 한 Polygon 체인</strong>을 사용하여
-            제품의 고유 UUID를 <strong>블록체인에 등록</strong>하고, 누구나 변조되지 않은 데이터를 통해
-            <strong>정품 여부를 실시간으로 확인</strong>할 수 있도록 설계되었습니다.
-            <br><br>
-            블록체인은 데이터를 변경할 수 없는 구조이기 때문에, 등록된 정보는 신뢰할 수 있으며,
-            <strong>위조 방지</strong>에 탁월한 효과를 가집니다.
+            이 시스템은 <strong>Polygon 블록체인</strong>을 기반으로 동작하며,
+            UUID를 등록하고 정품 여부를 검증할 수 있습니다.
+            블록체인에 등록된 정보는 <strong>위변조가 불가능</strong>하며,
+            실시간으로 정품 여부를 확인할 수 있습니다.
         </div>
-        
-        <!-- QR 코드 영역 -->
         <div id="qrcode"></div>
     </div>
-
-    <script>
-        const contractABI = [
-            {
-                "inputs": [
-                    {
-                        "internalType": "string",
-                        "name": "uuid",
-                        "type": "string"
-                    }
-                ],
-                "name": "markAsVerified",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "string",
-                        "name": "uuid",
-                        "type": "string"
-                    }
-                ],
-                "name": "verifyUUID",
-                "outputs": [
-                    {
-                        "internalType": "bool",
-                        "name": "",
-                        "type": "bool"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    {
-                        "internalType": "string",
-                        "name": "uuid",
-                        "type": "string"
-                    }
-                ],
-                "name": "getVerificationTime",
-                "outputs": [
-                    {
-                        "internalType": "uint256",
-                        "name": "",
-                        "type": "uint256"
-                    }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ];
-
-        // QR 코드 생성 함수
-        function generateQRCode(uuid) {
-            const url = `https://yourwebsite.com?uuid=${uuid}`;  // 홈페이지 URL과 UUID 결합
-            QRCode.toCanvas(document.getElementById('qrcode'), url, function (error) {
-                if (error) console.error(error);
-                console.log('QR 코드 생성 완료');
-            });
-        }
-
-        // 6자리 UUID만 확인하는 함수
-        async function verifyUUID() {
-            const uuid = document.getElementById('uuid').value.trim(); // 사용자 입력 UUID
-            const resultBox = document.getElementById('resultText');
-            const logBox = document.getElementById('logBox');
-
-            // 6자리 UUID만 확인
-            if (uuid.length !== 6) {
-                resultBox.innerText = "UUID는 6자리만 입력 가능합니다.";
-                return;
-            }
-
-            try {
-                const contract = new ethers.Contract(
-                    "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", // 실제 계약 주소
-                    contractABI,
-                    window.tcSigner
-                );
-
-                const isVerified = await contract.verifyUUID(uuid);
-
-                if (isVerified) {
-                    const timestamp = await contract.getVerificationTime(uuid);
-                    const date = new Date(Number(timestamp) * 1000); // UNIX 타임스탬프를 날짜로 변환
-                    resultBox.innerText = "✔ 정품입니다.";
-                    logBox.innerText = "최초 인증 시각: " + date.toLocaleString();
-                } else {
-                    const tx = await contract.markAsVerified(uuid); // 인증되지 않은 카드인 경우 인증
-                    await tx.wait();
-
-                    const newTimestamp = await contract.getVerificationTime(uuid);
-                    const verifiedDate = new Date(Number(newTimestamp) * 1000);
-                    resultBox.innerText = "✔ 정품입니다.";
-                    logBox.innerText = "최초 인증 시각: " + verifiedDate.toLocaleString();
-                }
-            } catch (err) {
-                resultBox.innerText = "⚠ 오류 발생: " + err.message;
-                logBox.innerText = "";
-            }
-        }
-
-        // 예시 UUID로 QR 코드 생성 (6자리 UUID 예시)
-        generateQRCode("AB1234");
-    </script>
 </body>
 </html>
 
