@@ -1,106 +1,111 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>TC CARD 정품 인증</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <style>
-        body {
-            background-color: #121212;
-            color: #00ffff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 100px;
-        }
-
-        .container {
-            background: #222;
-            padding: 30px;
-            border-radius: 20px;
-            width: 400px;
-            margin: auto;
-        }
-
-        input {
-            padding: 10px;
-            width: 250px;
-            border-radius: 10px;
-            border: none;
-            font-size: 1em;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            border-radius: 10px;
-            background-color: #00ffff;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        .result {
-            margin-top: 20px;
-            font-size: 1.2em;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polygon CARD 정품 인증</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+    }
+    .container {
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      width: 90%;
+      max-width: 480px;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #a78bfa;
+    }
+    input[type="text"] {
+      padding: 10px;
+      width: 80%;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #a78bfa;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .description {
+      margin-top: 25px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e0e0e0;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>TC CARD 정품 인증</h2>
-        <input type="text" id="uuidInput" placeholder="6자리 UUID 입력" maxlength="6">
-        <br>
-        <button onclick="verifyUUID()">정품 확인</button>
-        <div class="result" id="resultBox"></div>
+  <div class="container">
+    <h1>Polygon CARD 정품 인증</h1>
+    <input type="text" id="uuidInput" placeholder="UUID 6자리를 입력하세요" />
+    <br />
+    <button onclick="verifyUUID()">정품 확인</button>
+    <div id="result"></div>
+    <div class="description">
+      이 시스템은 이더리움을 기반으로 한 <strong>Polygon 체인</strong>을 사용하여 제품의 고유 UUID를 블록체인에 등록하고,<br>
+      누구나 변조되지 않은 데이터를 통해 정품 여부를 실시간으로 확인할 수 있도록 설계되었습니다.<br><br>
+      블록체인은 데이터를 변경할 수 없는 구조이기 때문에, 등록된 정보는 신뢰할 수 있으며 위조 방지에 탁월한 효과를 가집니다.
     </div>
+  </div>
 
-    <script>
-        const contractAddress = "0x8BF2B912B83eC7C93e4665Eb33E8EA6533dF6a6D";  // 실제 주소로 바꿔야 함
+  <script>
+    const contractAddress = "여기에_실제_배포된_컨트랙트_주소_입력";
+    const abi = [
+      "function verifyUUID(string memory uuid) public view returns (bool)",
+    ];
 
-        const contractABI = [
-            {
-                "inputs": [{"internalType": "string","name": "uuid","type": "string"}],
-                "name": "verifyUUID",
-                "outputs": [{"internalType": "bool","name": "","type": "bool"}],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [{"internalType": "string","name": "uuid","type": "string"}],
-                "name": "getVerificationTime",
-                "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ];
+    async function verifyUUID() {
+      const uuid = document.getElementById("uuidInput").value.trim();
+      const resultDiv = document.getElementById("result");
 
-        const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
-        const contract = new ethers.Contract(contractAddress, contractABI, provider);
+      if (!uuid || uuid.length !== 6) {
+        resultDiv.textContent = "유효한 6자리 UUID를 입력해주세요.";
+        resultDiv.style.color = "#f87171";
+        return;
+      }
 
-        async function verifyUUID() {
-            const uuid = document.getElementById("uuidInput").value.trim();
-            const resultBox = document.getElementById("resultBox");
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+        const isValid = await contract.verifyUUID(uuid);
 
-            if (uuid.length !== 6) {
-                resultBox.textContent = "❗UUID는 6자리여야 합니다.";
-                return;
-            }
-
-            try {
-                const isValid = await contract.verifyUUID(uuid);
-                if (isValid) {
-                    const timestamp = await contract.getVerificationTime(uuid);
-                    const verifiedDate = new Date(timestamp.toNumber() * 1000);
-                    resultBox.textContent = `✔ 정품입니다. 최초 인증 시간: ${verifiedDate.toLocaleString()}`;
-                } else {
-                    resultBox.textContent = "⚠ 정품이 아닙니다. 등록되지 않은 UUID입니다.";
-                }
-            } catch (err) {
-                resultBox.textContent = "⛔ 오류 발생: " + err.message;
-            }
-        }
-    </script>
+        resultDiv.textContent = isValid ? "✅ 정품입니다." : "❌ 정품이 아닙니다.";
+        resultDiv.style.color = isValid ? "#34d399" : "#f87171";
+      } catch (error) {
+        console.error(error);
+        resultDiv.textContent = "확인 중 오류가 발생했습니다.";
+        resultDiv.style.color = "#facc15";
+      }
+    }
+  </script>
 </body>
 </html>
-
-
