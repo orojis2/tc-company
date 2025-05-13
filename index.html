@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Polygon CARD 정품 인증</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background-image: url("background.jpg");
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 100%;
+    }
+    input {
+      padding: 12px;
+      width: 90%;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #a259ff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Polygon CARD 정품 인증</h2>
+    <input id="uuidInput" type="text" placeholder="UUID 6자리를 입력하세요" />
+    <button id="verifyBtn">정품 확인</button>
+    <div id="result"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contractAddress = "0x8Bf2F7C390C6d8Db4D2096f82c3f0F5636D86a6D"; // Checksum corrected
+    const abi = [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "addUUID",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "isValidUUID",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [{ "internalType": "string", "name": "uuid", "type": "string" }],
+        "name": "removeUUID",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+
+    async function verifyUUID() {
+      const uuid = document.getElementById("uuidInput").value;
+      if (!uuid) {
+        document.getElementById("result").innerText = "❗ UUID를 입력해주세요.";
+        return;
+      }
+
+      try {
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+        const isValid = await contract.isValidUUID(uuid);
+        document.getElementById("result").innerText = isValid ? "✅ 정품입니다." : "❌ 정품이 아닙니다.";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("result").innerText = "⚠️ 오류가 발생했습니다.";
+      }
+    }
+
+    document.getElementById("verifyBtn").addEventListener("click", verifyUUID);
+  </script>
+</body>
+</html>
