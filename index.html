@@ -54,7 +54,7 @@
       font-size: 12px;
       color: #ccc;
     }
-    #verifyInfo a {
+    #verifyInfo a, #verifyInfo button {
       color: #a259ff;
     }
   </style>
@@ -66,39 +66,49 @@
     <button onclick="verifyUUID()">정품 확인</button>
     <div id="result"></div>
     <div id="verifyInfo">
-      블록체인 인증 방식으로 위변조가 불가능하며,<br>
-      모든 인증 내역은 Polygon 체인에 영구 저장됩니다.<br><br>
-      <button onclick="showGuide()">여기서 블록체인 등록 여부 확인</button>
+      본 서비스는 <strong>이더리움 기반 Polygon 블록체인</strong>을 이용한 정품 인증 시스템으로,<br>
+      <strong>위변조가 불가능</strong>하며, 모든 기록은 <strong>블록체인에 영구 저장</strong>됩니다.<br><br>
+      <button onclick="showGuide()">폴리곤스캔에서 등록 여부 확인하기</button>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const usedUUIDs = new Set();
+    const contractAddress = "0x0f8771d2D3600b7BfD01b01aa009eeA4Bb9302a7";
+    const abi = [
+      "function checkUUID(string uuid) external view returns (string memory)"
+    ];
+    const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
 
-    function verifyUUID() {
+    async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value.trim();
       const resultBox = document.getElementById("result");
+      resultBox.innerText = "⏳ 인증 중...";
 
       if (!uuid) {
         resultBox.innerText = "❗ UUID를 입력해주세요.";
         return;
       }
 
-      if (usedUUIDs.has(uuid)) {
-        resultBox.innerText = `❗ 인증 횟수를 초과했습니다.\n(UUID 도용 가능성 있음)`;
-        return;
+      try {
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+        const result = await contract.checkUUID(uuid);
+
+        if (result.startsWith("ALREADY VERIFIED")) {
+          resultBox.innerText = `📜 본 카드는 블록체인에 타임스탬프 ${result.replace("ALREADY VERIFIED: ", "")}로 등록된 정품입니다.`;
+        } else if (result === "INVALID") {
+          resultBox.innerText = "❌ 본 카드는 블록체인에 등록되지 않은 카드입니다.";
+        } else {
+          resultBox.innerText = "❌ 인증되지 않은 상태입니다.";
+        }
+      } catch (err) {
+        console.error(err);
+        resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다.";
       }
-
-      // 인증 처리 (여기서는 시뮬레이션용 타임스탬프)
-      const timestamp = Math.floor(Date.now() / 1000);
-      resultBox.innerText = `📜 본 카드는 Polygon 블록체인에 타임스탬프 ${timestamp}\n으로 등록된 정품입니다.`;
-
-      // 인증 완료 UUID 저장
-      usedUUIDs.add(uuid);
     }
 
     function showGuide() {
-      if (confirm(`🔍 블록체인 등록 여부를 직접 확인하려면:\n\n1. 아래 버튼을 눌러 PolygonScan으로 이동하세요.\n2. 하단의 [Transactions] 탭에서 'RegisterUUID' 또는 'VerifyUUID' 트랜잭션을 찾습니다.\n3. 트랜잭션을 클릭하면 입력된 UUID를 볼 수 있으며,\n   입력한 UUID가 일치하면 해당 카드가 등록된 정품입니다.\n\n계속하시겠습니까?`)) {
+      if (confirm(`🔍 PolygonScan에서 등록 여부를 직접 확인하려면:\n\n1. 아래 버튼을 눌러 PolygonScan 페이지로 이동하세요.\n2. 하단의 [Transactions] 탭을 누릅니다.\n3. 'RegisterUUID' 또는 'VerifyUUID'가 표시된 트랜잭션을 클릭합니다.\n4. 상세 페이지에서 입력된 UUID를 찾을 수 있습니다.\n\n👉 등록된 UUID가 있는 경우, 해당 카드가 블록체인에 정품으로 등록된 것입니다.\n\n계속하시겠습니까?`)) {
         window.open("https://polygonscan.com/address/0x0f8771d2D3600b7BfD01b01aa009eeA4Bb9302a7", "_blank");
       }
     }
