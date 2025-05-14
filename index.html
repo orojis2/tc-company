@@ -70,3 +70,54 @@
       블록체인에 등록 여부 확인도 하고 싶다면 <a href="#" onclick="showPopup()">여기를 클릭</a>하세요.
     </div>
   </div>
+
+  <script type="module">
+    import { ethers } from "https://cdn.jsdelivr.net/npm/ethers@5.7.2/+esm";
+
+    const provider = new ethers.providers.JsonRpcProvider(
+      "https://polygon-mainnet.infura.io/v3/bfaa649142194441af37875d88e7b89d"
+    );
+    const contractAddress = "0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7";
+    const abi = [
+      "function checkUUID(string uuid) public view returns (string memory)"
+    ];
+
+    async function verifyUUID() {
+      const uuid = document.getElementById("uuidInput").value.trim();
+      const resultBox = document.getElementById("result");
+      resultBox.innerText = "⏳ 처리 중...";
+
+      if (!uuid) {
+        resultBox.innerText = "❗ UUID를 입력해주세요.";
+        return;
+      }
+
+      try {
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+        const result = await contract.checkUUID(uuid);
+
+        if (result.startsWith("ALREADY VERIFIED")) {
+          const time = result.split(": ")[1] || "시간 없음";
+          resultBox.innerText = `🔁 이미 인증된 카드입니다.\n⏰ 인증시간: ${time}`;
+        } else if (result === "VALID") {
+          const nowKST = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
+          resultBox.innerText = `✅ 정품입니다.\n⏰ 인증시간: ${nowKST}`;
+        } else {
+          resultBox.innerText = "❌ 정품이 아닙니다.";
+        }
+      } catch (err) {
+        console.error(err);
+        resultBox.innerText = "⚠️ 오류가 발생했습니다.";
+      }
+    }
+
+    function showPopup() {
+      alert(
+        `폴리곤스캔(블록체인 공식홈페이지)에서 확인하는 방법:\n\n1. https://polygonscan.com 에 접속합니다.\n2. 검색창에 아래 스마트컨트랙트 주소를 붙여넣습니다.\n   👉 0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7\n3. Read Contract > checkUUID 항목으로 이동합니다.\n4. UUID 값을 입력하면 등록 여부를 확인할 수 있습니다.`
+      );
+    }
+
+    document.getElementById("verifyBtn").addEventListener("click", verifyUUID);
+  </script>
+</body>
+</html>
