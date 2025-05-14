@@ -69,8 +69,7 @@
     <div id="result"></div>
     <div id="verifyInfo">
       본 서비스는 <strong>이더리움 기반 Polygon 블록체인</strong>을 활용한 정품 등록 및 검증 시스템입니다.<br>
-      <strong>위변조가 불가능하며,</strong> 모든 등록 내역은 <strong>블록체인에 영구 보관</strong>됩니다.<br><br>
-      🔍 <a onclick="showGuide()">Polygon 공식 홈페이지에서 확인하기</a>
+      <strong>위변조가 불가능하며,</strong> 모든 등록 내역은 <strong>블록체인에 영구 보관</strong>됩니다.<br>
     </div>
   </div>
 
@@ -106,13 +105,10 @@
         resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다.";
       }
     }
-
-    function showGuide() {
-      alert(`📘 PolygonScan에서 등록 여부 확인 방법\n\n1. 아래 링크를 클릭해 PolygonScan 페이지로 이동합니다.\n2. 페이지 중간의 [Transactions] 탭을 선택합니다.\n3. 목록에서 'RegisterUUID'로 등록된 트랜잭션을 확인합니다.\n4. 해당 트랜잭션을 클릭하여 세부정보에 등록된 UUID를 확인할 수 있습니다.\n\n👉 PolygonScan은 Polygon 블록체인의 공식 탐색기입니다.`);
-      window.open("https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7", "_blank");
-    }
   </script>
 </body>
+</html>
+
 
 
 
