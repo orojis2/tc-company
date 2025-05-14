@@ -73,12 +73,14 @@
     <button id="verifyBtn">정품 확인</button>
     <div id="result"></div>
     <div class="popup" id="infoPopup">
-      블록체인 기반 검증 시스템으로 위변조가 불가능하며,<br/>
+      블록체인 인증 방식으로 위변조가 불가능하며,<br/>
       모든 인증 내역은 Polygon 체인에 영구 저장됩니다.<br/><br/>
-      폴리곤스캔 (블록체인 공식홈페이지)에서 <a href="https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7" target="_blank">컨트랙트 확인하기</a><br/>
+      블록체인 등록 여부 확인도 하고 싶다면 아래를 클릭하세요.<br/><br/>
+      <strong>폴리곤스캔 (블록체인 공식홈페이지)에서 확인하는 방법</strong><br/>
+      <a href="https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7" target="_blank">컨트랙트 확인하기</a><br/>
       스마트컨트랙트 주소 <strong>0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7</strong> 를 검색하고,<br/>
       "Read Contract > checkUUID" 항목에 UUID를 입력하면<br/>
-      직접 블록체인에 등록 여부를 확인할 수 있습니다.
+      직접 <strong>블록체인에 등록 여부</strong>를 확인할 수 있습니다.
     </div>
   </div>
 
@@ -102,8 +104,29 @@
 
       resultBox.innerText = "⏳ 처리 중...";
 
+      const rpcList = [
+        "https://polygon-rpc.com",
+        "https://rpc-mainnet.maticvigil.com",
+        "https://rpc-mainnet.matic.quiknode.pro"
+      ];
+
+      let provider;
+      for (let rpc of rpcList) {
+        try {
+          provider = new ethers.providers.JsonRpcProvider(rpc);
+          await provider.getBlockNumber();
+          break;
+        } catch (e) {
+          console.warn(`RPC 실패: ${rpc}`);
+        }
+      }
+      if (!provider) {
+        resultBox.innerText = "⚠️ 네트워크 오류: RPC 서버에 연결할 수 없습니다.";
+        popup.style.display = "none";
+        return;
+      }
+
       try {
-        const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/polygon");
         const contract = new ethers.Contract(contractAddress, abi, provider);
         const result = await contract.checkUUID(uuid);
 
