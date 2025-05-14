@@ -78,16 +78,11 @@
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        const tx = await contract.isValidUUID(uuid);
+        const tx = await contract.isValidUUID(uuid, { gasLimit: 50000 }); // ✅ 가스 명시
         const receipt = await tx.wait();
 
-        const log = receipt.events?.find(e => e.event === undefined);
-        if (!log) {
-          document.getElementById("result").innerText = "⚠️ 응답을 처리할 수 없습니다.";
-          return;
-        }
-
         const iface = new ethers.utils.Interface(abi);
+        const log = receipt.logs.find(l => l.data);
         const decoded = iface.decodeFunctionResult("isValidUUID", log.data);
 
         const isValid = decoded[0];
@@ -96,25 +91,4 @@
         let resultText = "";
         if (message === "VALID") {
           resultText = "✅ 정품입니다.";
-        } else if (message === "INVALID") {
-          resultText = "❌ 정품이 아닙니다.";
-        } else if (message.startsWith("ALREADY VERIFIED")) {
-          const timestamp = message.split(": ")[1];
-          const date = new Date(Number(timestamp) * 1000);
-          const formatted = date.toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-          resultText = `⚠️ 이미 인증된 카드입니다.\n최초 인증시간: ${formatted}`;
-        } else {
-          resultText = `⚠️ 알 수 없는 응답: ${message}`;
-        }
-
-        document.getElementById("result").innerText = resultText;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("result").innerText = "⚠️ 오류가 발생했습니다.";
-      }
-    }
-
-    document.getElementById("verifyBtn").addEventListener("click", verifyUUID);
-  </script>
-</body>
-</html>
+        } else if
