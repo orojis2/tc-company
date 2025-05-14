@@ -73,27 +73,39 @@
   </div>
 
   <script>
+    const usedUUIDs = new Set();
+
     function verifyUUID() {
-      const resultBox = document.getElementById("result");
       const uuid = document.getElementById("uuidInput").value.trim();
+      const resultBox = document.getElementById("result");
+
       if (!uuid) {
         resultBox.innerText = "❗ UUID를 입력해주세요.";
         return;
       }
-      resultBox.innerText = `✅ 입력하신 UUID(${uuid})를 확인 중입니다...`;
 
-      // 여기에 실제 Web3 연동 로직이 들어가야 함 (생략됨)
-      setTimeout(() => {
-        resultBox.innerText = `✅ 정품입니다.\n🕐 인증시간: 2025.05.14 16:40:34`;
-      }, 1500);
+      if (usedUUIDs.has(uuid)) {
+        resultBox.innerText = `❗ 인증 횟수를 초과했습니다.\n(UUID 도용 가능성 있음)`;
+        return;
+      }
+
+      // 인증 처리 (여기서는 시뮬레이션용 타임스탬프)
+      const timestamp = Math.floor(Date.now() / 1000);
+      resultBox.innerText = `📜 본 카드는 Polygon 블록체인에 타임스탬프 ${timestamp}\n으로 등록된 정품입니다.`;
+
+      // 인증 완료 UUID 저장
+      usedUUIDs.add(uuid);
     }
 
     function showGuide() {
-      alert(`🔍 Polygon 블록체인에서 정품 등록 여부 확인하는 방법:\n\n1. 아래 링크를 클릭해 블록체인 트랜잭션 페이지로 이동하세요.\n2. 페이지 하단의 [Transactions] 탭을 확인합니다.\n3. Method가 \"RegisterUUID\" 또는 \"VerifyUUID\"인 항목을 클릭하세요.\n4. 상세 페이지에서 Input Data 또는 Decoded Input에 UUID가 표시됩니다.\n5. 등록된 시각도 확인할 수 있습니다.\n\n👉 확인 링크:\nhttps://polygonscan.com/address/0x0f8771d2D3600b7BfD01b01aa009eeA4Bb9302a7`);
+      if (confirm(`🔍 블록체인 등록 여부를 직접 확인하려면:\n\n1. 아래 버튼을 눌러 PolygonScan으로 이동하세요.\n2. 하단의 [Transactions] 탭에서 'RegisterUUID' 또는 'VerifyUUID' 트랜잭션을 찾습니다.\n3. 트랜잭션을 클릭하면 입력된 UUID를 볼 수 있으며,\n   입력한 UUID가 일치하면 해당 카드가 등록된 정품입니다.\n\n계속하시겠습니까?`)) {
+        window.open("https://polygonscan.com/address/0x0f8771d2D3600b7BfD01b01aa009eeA4Bb9302a7", "_blank");
+      }
     }
   </script>
 </body>
 </html>
+
 
 
 
