@@ -73,9 +73,7 @@
       타임스탬프는 Polygon 블록체인에 기록된 정품 등록번호입니다.<br />
       아래 버튼을 눌러 PolygonScan에서 직접 확인하실 수 있습니다.
     </div>
-    <a class="scan-link" href="https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7" target="_blank">
-      🔗 PolygonScan에서 확인하기
-    </a>
+    <a class="scan-link" id="scanButton">🔗 PolygonScan에서 확인하기</a>
   </div>
 
   <script type="module">
@@ -89,10 +87,13 @@
       "function checkUUID(string uuid) public view returns (string memory)"
     ];
 
+    let lastTimestamp = null;
+
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value.trim();
       const resultBox = document.getElementById("result");
       resultBox.innerText = "⏳ 처리 중...";
+      lastTimestamp = null;
 
       if (!uuid) {
         resultBox.innerText = "❗ UUID를 입력해주세요.";
@@ -105,9 +106,11 @@
 
         if (result.startsWith("ALREADY VERIFIED")) {
           const timestamp = result.split(": ")[1];
+          lastTimestamp = timestamp;
           resultBox.innerText = `🔁 본 카드는 블록체인에 타임스탬프 ${timestamp}\n으로 등록된 정품입니다.`;
         } else if (result === "VALID") {
           const now = Math.floor(Date.now() / 1000);
+          lastTimestamp = now;
           resultBox.innerText = `📜 본 카드는 블록체인에 타임스탬프 ${now}\n으로 등록된 정품입니다.`;
         } else {
           resultBox.innerText = "❌ 정품이 아닙니다.";
@@ -118,10 +121,16 @@
       }
     }
 
+    function showScanPopup() {
+      const message = `✅ PolygonScan에서 확인하려면 다음을 따라주세요:\n\n1. 열리는 페이지에서 'Read Contract' 탭을 클릭하세요.\n2. 'checkUUID' 항목을 찾아 UUID를 입력하고 'Query'를 누르세요.\n3. 등록된 타임스탬프를 직접 확인할 수 있습니다.`;
+      alert(message);
+      window.open(`https://polygonscan.com/address/${contractAddress}#readContract`, '_blank');
+    }
+
     document.getElementById("verifyBtn").addEventListener("click", verifyUUID);
+    document.getElementById("scanButton").addEventListener("click", showScanPopup);
   </script>
 </body>
 </html>
-
 
 
