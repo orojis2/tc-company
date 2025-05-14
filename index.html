@@ -98,8 +98,8 @@
         const result = await contract.checkUUID(uuid);
 
         if (result.startsWith("ALREADY VERIFIED")) {
-          const time = result.split(": ")[1] || "시간 없음";
-          resultBox.innerText = `🔁 이미 인증된 카드입니다.\n⏰ 인증시간: ${time}`;
+          const timeText = result.split(": ")[1] || "기록 없음";
+          resultBox.innerText = `🔁 이미 인증된 카드입니다.\n⏰ 인증시간: ${timeText}`;
         } else if (result === "VALID") {
           const nowKST = new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
           resultBox.innerText = `✅ 정품입니다.\n⏰ 인증시간: ${nowKST}`;
@@ -122,3 +122,5 @@
   </script>
 </body>
 </html>
+
+
