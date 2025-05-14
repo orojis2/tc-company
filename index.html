@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
-      background: #000;
+      background: #101010;
       color: #fff;
       display: flex;
       flex-direction: column;
@@ -21,31 +21,44 @@
       background-position: center;
     }
     .box {
-      background: rgba(0, 0, 0, 0.75);
-      padding: 30px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 40px;
       border-radius: 20px;
       text-align: center;
+      box-shadow: 0px 0px 20px rgba(0, 255, 255, 0.3);
     }
     input {
-      padding: 10px;
-      font-size: 16px;
+      padding: 12px;
+      font-size: 18px;
       border-radius: 10px;
-      margin-bottom: 10px;
-      width: 200px;
+      margin-bottom: 20px;
+      width: 250px;
+      background: #222;
+      border: 1px solid #fff;
+      color: #fff;
     }
     button {
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 12px 25px;
+      font-size: 18px;
       border-radius: 10px;
       cursor: pointer;
+      background-color: #1e90ff;
+      color: #fff;
+      border: none;
+      box-shadow: 0px 0px 15px rgba(30, 144, 255, 0.6);
+    }
+    button:hover {
+      background-color: #4682b4;
     }
     #resultMessage {
-      margin-top: 20px;
-      font-size: 18px;
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
     }
-    #contractInfo {
+    #description {
       margin-top: 20px;
-      display: none;
+      font-size: 16px;
+      color: #b0c4de;
     }
   </style>
 </head>
@@ -56,13 +69,10 @@
     <br />
     <button onclick="verifyUUID()">정품 확인</button>
     <p id="resultMessage"></p>
-
-    <div id="contractInfo">
-      <p>📌 본 제품은 Polygon 블록체인에 등록된 정품입니다.</p>
-      <button onclick="window.open('https://polygonscan.com/address/0x0f8771d2D3600b7BFd01b01aA009eeA4Bb9302a7#code')">
-        🔍 스마트컨트랙트 코드 보기
-      </button>
-    </div>
+    <p id="description">
+      본 서비스는 이더리움 기반 Polygon 블록체인을 활용한 정품 등록 및 검증 시스템입니다. 
+      위변조가 불가능하며, 모든 등록 내역은 블록체인에 영구 보관됩니다.
+    </p>
   </div>
 
   <script>
@@ -74,11 +84,9 @@
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value.trim();
       const resultMessage = document.getElementById("resultMessage");
-      const contractInfo = document.getElementById("contractInfo");
 
       if (!uuid) {
         resultMessage.textContent = "❗ UUID를 입력해주세요.";
-        contractInfo.style.display = "none";
         return;
       }
 
@@ -89,7 +97,6 @@
         }
 
         await ethereum.request({ method: "eth_requestAccounts" });
-
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const contract = new ethers.Contract(contractAddress, contractABI, provider);
 
@@ -97,20 +104,18 @@
 
         if (isValid) {
           resultMessage.textContent = "✅ 폴리곤 블록체인에 등록된 카드입니다.";
-          contractInfo.style.display = "block";
         } else {
           resultMessage.textContent = "❌ 폴리곤 블록체인에 등록되지 않은 카드입니다.";
-          contractInfo.style.display = "none";
         }
-      } catch (error) {
+      } catch (err) {
+        console.error("오류 발생:", err);
         resultMessage.textContent = "⚠️ 인증 중 오류가 발생했습니다.";
-        contractInfo.style.display = "none";
-        console.error(error);
       }
     }
   </script>
 </body>
 </html>
+
 
 
 
