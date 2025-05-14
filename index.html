@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Polygon CARD 정품 인증</title>
+  <title>Polygon CARD 정품 인증 (디버깅)</title>
   <style>
     body {
       margin: 0;
@@ -67,8 +67,13 @@
 
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value;
+      const resultBox = document.getElementById("result");
+      resultBox.innerText = "⏳ 처리 중...";
+
+      console.log("입력된 UUID:", uuid);
+
       if (!uuid) {
-        document.getElementById("result").innerText = "❗ UUID를 입력해주세요.";
+        resultBox.innerText = "❗ UUID를 입력해주세요.";
         return;
       }
 
@@ -76,19 +81,24 @@
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         await provider.send("eth_requestAccounts", []);
         const signer = provider.getSigner();
-        const contract = new ethers.Contract(contractAddress, abi, signer);
+        console.log("Signer address:", await signer.getAddress());
 
-        const tx = await contract.isValidUUID(uuid, { gasLimit: 50000 }); // ✅ 가스 명시
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+        console.log("컨트랙트 인스턴스 생성 완료");
+
+        const tx = await contract.isValidUUID(uuid, { gasLimit: 50000 });
+        console.log("트랜잭션 전송됨. Hash:", tx.hash);
+
         const receipt = await tx.wait();
+        console.log("트랜잭션 성공. Receipt:", receipt);
+
+        // 디버깅용 로그 추가
+        const log = receipt.logs.find(l => l.data);
+        if (!log) {
+          console.warn("로그 없음");
+          resultBox.innerText = "⚠️ 인증 결과 로그를 찾을 수 없습니다.";
+          return;
+        }
 
         const iface = new ethers.utils.Interface(abi);
-        const log = receipt.logs.find(l => l.data);
-        const decoded = iface.decodeFunctionResult("isValidUUID", log.data);
-
-        const isValid = decoded[0];
-        const message = decoded[1];
-
-        let resultText = "";
-        if (message === "VALID") {
-          resultText = "✅ 정품입니다.";
-        } else if
+        const decoded = iface.decodeFunction
