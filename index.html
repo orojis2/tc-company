@@ -1,119 +1,117 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Polygon CARD 정품 인증</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.0.0/dist/ethers.umd.min.js"></script>
   <style>
     body {
       margin: 0;
       font-family: "Segoe UI", sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
       background-image: url("background.jpg");
       background-size: cover;
       background-position: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
-    .container {
+    .box {
       background: rgba(0, 0, 0, 0.75);
       padding: 30px;
-      border-radius: 16px;
+      border-radius: 20px;
       text-align: center;
-      color: white;
-      max-width: 430px;
-      width: 100%;
     }
     input {
-      padding: 12px;
-      width: 90%;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 6px;
+      padding: 10px;
       font-size: 16px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      width: 200px;
     }
     button {
-      padding: 12px 25px;
+      padding: 10px 20px;
       font-size: 16px;
-      background-color: #a259ff;
-      color: white;
-      border: none;
-      border-radius: 6px;
+      border-radius: 10px;
       cursor: pointer;
-      margin-top: 10px;
     }
-    #result {
+    #resultMessage {
       margin-top: 20px;
-      font-weight: bold;
       font-size: 18px;
-      white-space: pre-wrap;
     }
-    #verifyInfo {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #ccc;
-    }
-    #verifyInfo a {
-      color: #a259ff;
-      text-decoration: underline;
-      cursor: pointer;
+    #contractInfo {
+      margin-top: 20px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="box">
     <h2>Polygon CARD 정품 인증</h2>
-    <input id="uuidInput" type="text" placeholder="UUID 6자리를 입력하세요" />
+    <input id="uuidInput" type="text" placeholder="UUID 입력" />
+    <br />
     <button onclick="verifyUUID()">정품 확인</button>
-    <div id="result"></div>
-    <div id="verifyInfo">
-      본 서비스는 <strong>이더리움 기반 Polygon 블록체인</strong>을 활용한 정품 등록 및 검증 시스템입니다.<br>
-      <strong>위변조가 불가능하며,</strong> 모든 등록 내역은 <strong>블록체인에 영구 보관</strong>됩니다.<br><br>
-      🔍 <a onclick="showGuide()">Polygon 공식 홈페이지에서 확인하기</a>
+    <p id="resultMessage"></p>
+
+    <div id="contractInfo">
+      <p>📌 본 제품은 Polygon 블록체인에 등록된 정품입니다.</p>
+      <button onclick="window.open('https://polygonscan.com/address/0x0f8771d2D3600b7BFd01b01aA009eeA4Bb9302a7#code')">
+        🔍 스마트컨트랙트 코드 보기
+      </button>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7";
-    const abi = [
-      "function checkUUID(string uuid) external view returns (string memory)"
+    const contractAddress = "0x0f8771d2D3600b7BFd01b01aA009eeA4Bb9302a7";
+    const contractABI = [
+      "function isValidUUID(string memory uuid) public view returns (bool)"
     ];
-    const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
 
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value.trim();
-      const resultBox = document.getElementById("result");
-      resultBox.innerText = "⏳ 인증 중...";
+      const resultMessage = document.getElementById("resultMessage");
+      const contractInfo = document.getElementById("contractInfo");
 
       if (!uuid) {
-        resultBox.innerText = "❗ UUID를 입력해주세요.";
+        resultMessage.textContent = "❗ UUID를 입력해주세요.";
+        contractInfo.style.display = "none";
         return;
       }
 
       try {
-        const contract = new ethers.Contract(contractAddress, abi, provider);
-        const result = await contract.checkUUID(uuid);
-
-        if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerText = "✅ 본 카드는 Polygon 블록체인에 등록된 정품입니다.";
-        } else {
-          resultBox.innerText = "❌ 본 카드는 Polygon 블록체인에 등록되지 않은 카드입니다.";
+        if (!window.ethereum) {
+          resultMessage.textContent = "❗ 메타마스크가 설치되어 있지 않습니다.";
+          return;
         }
-      } catch (err) {
-        console.error(err);
-        resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다.";
-      }
-    }
 
-    function showGuide() {
-      alert(`📘 PolygonScan에서 등록 여부 확인 방법\n\n1. 아래 링크를 클릭해 PolygonScan 페이지로 이동합니다.\n2. 페이지 중간의 [Transactions] 탭을 선택합니다.\n3. 목록에서 'RegisterUUID'로 등록된 트랜잭션을 확인합니다.\n4. 해당 트랜잭션을 클릭하여 세부정보에 등록된 UUID를 확인할 수 있습니다.\n\n👉 PolygonScan은 Polygon 블록체인의 공식 탐색기입니다.`);
-      window.open("https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7", "_blank");
+        await ethereum.request({ method: "eth_requestAccounts" });
+
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(contractAddress, contractABI, provider);
+
+        const isValid = await contract.isValidUUID(uuid);
+
+        if (isValid) {
+          resultMessage.textContent = "✅ 폴리곤 블록체인에 등록된 카드입니다.";
+          contractInfo.style.display = "block";
+        } else {
+          resultMessage.textContent = "❌ 폴리곤 블록체인에 등록되지 않은 카드입니다.";
+          contractInfo.style.display = "none";
+        }
+      } catch (error) {
+        resultMessage.textContent = "⚠️ 인증 중 오류가 발생했습니다.";
+        contractInfo.style.display = "none";
+        console.error(error);
+      }
     }
   </script>
 </body>
 </html>
+
 
 
 
