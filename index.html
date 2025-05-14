@@ -54,8 +54,10 @@
       font-size: 12px;
       color: #ccc;
     }
-    #verifyInfo a, #verifyInfo button {
+    #verifyInfo a {
       color: #a259ff;
+      text-decoration: underline;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -68,7 +70,7 @@
     <div id="verifyInfo">
       본 서비스는 <strong>이더리움 기반 Polygon 블록체인</strong>을 활용한 정품 등록 및 검증 시스템입니다.<br>
       <strong>위변조가 불가능하며,</strong> 모든 등록 내역은 <strong>블록체인에 영구 보관</strong>됩니다.<br><br>
-      👉 <button onclick="showGuide()">Polygon 공식 홈페이지에서 확인하기</button>
+      🔍 <a onclick="showGuide()">Polygon 공식 홈페이지에서 확인하기</a>
     </div>
   </div>
 
@@ -94,7 +96,7 @@
         const contract = new ethers.Contract(contractAddress, abi, provider);
         const result = await contract.checkUUID(uuid);
 
-        if (result === "VALID") {
+        if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
           resultBox.innerText = "✅ 본 카드는 Polygon 블록체인에 등록된 정품입니다.";
         } else {
           resultBox.innerText = "❌ 본 카드는 Polygon 블록체인에 등록되지 않은 카드입니다.";
