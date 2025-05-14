@@ -49,16 +49,14 @@
       white-space: pre-wrap;
     }
     .popup {
-      display: none;
-      position: absolute;
-      bottom: 30px;
+      margin-top: 25px;
       background-color: rgba(0, 0, 0, 0.9);
       color: #ccc;
       font-size: 13px;
       padding: 15px;
       border-radius: 10px;
       max-width: 360px;
-      width: 90%;
+      width: 100%;
     }
     .popup a {
       color: #a259ff;
@@ -104,23 +102,11 @@
 
       resultBox.innerText = "⏳ 처리 중...";
 
-      const rpcList = [
-        "https://polygon-rpc.com",
-        "https://rpc-mainnet.maticvigil.com",
-        "https://rpc-mainnet.matic.quiknode.pro"
-      ];
-
       let provider;
-      for (let rpc of rpcList) {
-        try {
-          provider = new ethers.providers.JsonRpcProvider(rpc);
-          await provider.getBlockNumber();
-          break;
-        } catch (e) {
-          console.warn(`RPC 실패: ${rpc}`);
-        }
-      }
-      if (!provider) {
+      try {
+        provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+        await provider.getBlockNumber();
+      } catch (e) {
         resultBox.innerText = "⚠️ 네트워크 오류: RPC 서버에 연결할 수 없습니다.";
         popup.style.display = "none";
         return;
@@ -133,7 +119,8 @@
         if (result.startsWith("VALID")) {
           resultBox.innerText = "✅ 정품입니다.";
         } else if (result.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerText = "✅ 이미 인증된 카드입니다.\n인증 시간: " + result.replace("ALREADY VERIFIED: ", "");
+          const timestamp = result.replace("ALREADY VERIFIED: ", "");
+          resultBox.innerText = "✅ 이미 인증된 카드입니다.\n인증 시간: " + timestamp;
         } else {
           resultBox.innerText = "❌ 정품이 아닙니다.";
         }
