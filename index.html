@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Polygon CARD 정품 인증 (디버깅)</title>
+  <title>Polygon CARD 정품 인증</title>
   <style>
     body {
       margin: 0;
@@ -18,7 +17,7 @@
       height: 100vh;
     }
     .container {
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.75);
       padding: 30px;
       border-radius: 16px;
       text-align: center;
@@ -49,6 +48,11 @@
       font-size: 18px;
       white-space: pre-wrap;
     }
+    .note {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #cccccc;
+    }
   </style>
 </head>
 <body>
@@ -57,74 +61,47 @@
     <input id="uuidInput" type="text" placeholder="UUID 6자리를 입력하세요" />
     <button id="verifyBtn">정품 확인</button>
     <div id="result"></div>
+    <div class="note">
+      블록체인 기반 검증 시스템으로 위변조가 불가능하며,<br/>
+      모든 인증 내역은 Polygon 체인에 영구 저장됩니다.<br/><br/>
+      폴리곤스캔 <a href="https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7" target="_blank" style="color:#a259ff; text-decoration:underline;">컨트랙트 확인하기</a><br/>
+      스마트컨트랙트 주소를 검색하고,<br/>
+      "Read Contract > checkUUID" 항목에 UUID를 입력하면<br/>
+      직접 진위 여부를 확인할 수 있습니다.
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0x70879ecbed49822430df353fb243e166252af020";
+    const contractAddress = "0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7";
     const abi = [
-      "function isValidUUID(string uuid) public returns (bool, string)"
+      "function checkUUID(string uuid) external view returns (string)"
     ];
 
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value;
       const resultBox = document.getElementById("result");
-      resultBox.innerText = "⏳ 처리 중...";
-
-      console.log("입력된 UUID:", uuid);
-
       if (!uuid) {
         resultBox.innerText = "❗ UUID를 입력해주세요.";
         return;
       }
 
+      resultBox.innerText = "⏳ 처리 중...";
+
       try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = provider.getSigner();
-        console.log("Signer address:", await signer.getAddress());
+        const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+        const contract = new ethers.Contract(contractAddress, abi, provider);
+        const result = await contract.checkUUID(uuid);
 
-        const contract = new ethers.Contract(contractAddress, abi, signer);
-        console.log("컨트랙트 인스턴스 생성 완료");
-
-        const tx = await contract.isValidUUID(uuid, { gasLimit: 50000 });
-        console.log("트랜잭션 전송됨. Hash:", tx.hash);
-
-        const receipt = await tx.wait();
-        console.log("트랜잭션 성공. Receipt:", receipt);
-
-        const log = receipt.logs.find(l => l.data);
-        if (!log) {
-          console.warn("로그 없음");
-          resultBox.innerText = "⚠️ 인증 결과 로그를 찾을 수 없습니다.";
-          return;
-        }
-
-        const iface = new ethers.utils.Interface(abi);
-        const decoded = iface.decodeFunctionResult("isValidUUID", log.data);
-        console.log("디코딩된 결과:", decoded);
-
-        const isValid = decoded[0];
-        const message = decoded[1];
-        let resultText = "";
-
-        if (message === "VALID") {
-          resultText = "✅ 정품입니다.";
-        } else if (message === "INVALID") {
-          resultText = "❌ 정품이 아닙니다.";
-        } else if (message.startsWith("ALREADY VERIFIED")) {
-          const timestamp = message.split(": ")[1];
-          const date = new Date(Number(timestamp) * 1000);
-          const formatted = date.toLocaleString("ko-KR", { timeZone: "Asia/Seoul" });
-          resultText = `⚠️ 이미 인증된 카드입니다.\n최초 인증시간: ${formatted}`;
+        if (result.startsWith("VALID")) {
+          resultBox.innerText = "✅ 정품입니다.";
+        } else if (result.startsWith("ALREADY VERIFIED")) {
+          resultBox.innerText = "✅ 이미 인증된 카드입니다.\n인증 시간: " + result.replace("ALREADY VERIFIED: ", "");
         } else {
-          resultText = `⚠️ 알 수 없는 응답: ${message}`;
+          resultBox.innerText = "❌ 정품이 아닙니다.";
         }
-
-        resultBox.innerText = resultText;
       } catch (err) {
-        console.error("🚨 실행 중 오류 발생:", err);
-        alert("⚠️ 오류 발생: " + err.message);
+        console.error(err);
         resultBox.innerText = "⚠️ 오류가 발생했습니다.";
       }
     }
