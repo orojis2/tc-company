@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Polygon CARD 정품 인증</title>
   <style>
     body {
@@ -17,7 +17,7 @@
       height: 100vh;
     }
     .container {
-      background: rgba(0, 0, 0, 0.75);
+      background: rgba(0, 0, 0, 0.7);
       padding: 30px;
       border-radius: 16px;
       text-align: center;
@@ -48,19 +48,13 @@
       font-size: 18px;
       white-space: pre-wrap;
     }
-    .popup {
-      margin-top: 25px;
-      background-color: rgba(0, 0, 0, 0.9);
+    #verifyInfo {
+      margin-top: 30px;
+      font-size: 12px;
       color: #ccc;
-      font-size: 13px;
-      padding: 15px;
-      border-radius: 10px;
-      max-width: 360px;
-      width: 100%;
     }
-    .popup a {
+    #verifyInfo a {
       color: #a259ff;
-      text-decoration: underline;
     }
   </style>
 </head>
@@ -70,45 +64,28 @@
     <input id="uuidInput" type="text" placeholder="UUID 6자리를 입력하세요" />
     <button id="verifyBtn">정품 확인</button>
     <div id="result"></div>
-    <div class="popup" id="infoPopup">
-      블록체인 인증 방식으로 위변조가 불가능하며,<br/>
-      모든 인증 내역은 Polygon 체인에 영구 저장됩니다.<br/><br/>
-      블록체인 등록 여부 확인도 하고 싶다면 아래를 클릭하세요.<br/><br/>
-      <strong>폴리곤스캔 (블록체인 공식홈페이지)에서 확인하는 방법</strong><br/>
-      <a href="https://polygonscan.com/address/0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7" target="_blank">컨트랙트 확인하기</a><br/>
-      스마트컨트랙트 주소 <strong>0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7</strong> 를 검색하고,<br/>
-      "Read Contract > checkUUID" 항목에 UUID를 입력하면<br/>
-      직접 <strong>블록체인에 등록 여부</strong>를 확인할 수 있습니다.
+    <div id="verifyInfo">
+      블록체인 인증 방식으로 위변조가 불가능하며,<br>
+      모든 인증 내역은 Polygon 체인에 영구 저장됩니다.<br><br>
+      블록체인에 등록 여부 확인도 하고 싶다면 <a href="#" onclick="showPopup()">여기를 클릭</a>하세요.
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
+    const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
     const contractAddress = "0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7";
     const abi = [
-      "function checkUUID(string uuid) external view returns (string)"
+      "function checkUUID(string uuid) public view returns (string memory)"
     ];
 
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value;
       const resultBox = document.getElementById("result");
-      const popup = document.getElementById("infoPopup");
+      resultBox.innerText = "⏳ 처리 중...";
 
       if (!uuid) {
         resultBox.innerText = "❗ UUID를 입력해주세요.";
-        popup.style.display = "none";
-        return;
-      }
-
-      resultBox.innerText = "⏳ 처리 중...";
-
-      let provider;
-      try {
-        provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
-        await provider.getBlockNumber();
-      } catch (e) {
-        resultBox.innerText = "⚠️ 네트워크 오류: RPC 서버에 연결할 수 없습니다.";
-        popup.style.display = "none";
         return;
       }
 
@@ -116,21 +93,23 @@
         const contract = new ethers.Contract(contractAddress, abi, provider);
         const result = await contract.checkUUID(uuid);
 
-        if (result.startsWith("VALID")) {
+        if (result.includes("ALREADY VERIFIED")) {
+          resultBox.innerText = `🔁 이미 인증된 카드입니다.\n${result}`;
+        } else if (result === "VALID") {
           resultBox.innerText = "✅ 정품입니다.";
-        } else if (result.startsWith("ALREADY VERIFIED")) {
-          const timestamp = result.replace("ALREADY VERIFIED: ", "");
-          resultBox.innerText = "✅ 이미 인증된 카드입니다.\n인증 시간: " + timestamp;
         } else {
           resultBox.innerText = "❌ 정품이 아닙니다.";
         }
-
-        popup.style.display = "block";
       } catch (err) {
         console.error(err);
         resultBox.innerText = "⚠️ 오류가 발생했습니다.";
-        popup.style.display = "none";
       }
+    }
+
+    function showPopup() {
+      alert(
+        `폴리곤스캔(블록체인 공식홈페이지)에서 확인하는 방법:\n\n1. https://polygonscan.com 에 접속합니다.\n2. 검색창에 아래 스마트컨트랙트 주소를 붙여넣습니다.\n   👉 0x0f8771d2d3600b7bfd01b01aa009eea4bb9302a7\n3. Read Contract > checkUUID 항목으로 이동합니다.\n4. UUID 값을 입력하면 등록 여부를 확인할 수 있습니다.`
+      );
     }
 
     document.getElementById("verifyBtn").addEventListener("click", verifyUUID);
