@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Polygon CARD 정품 인증</title>
+  <title>Polygon 블록체인 공식 인증</title>
   <style>
     body {
       margin: 0;
@@ -63,13 +63,14 @@
 </head>
 <body>
   <div class="container">
-    <h2>Polygon CARD 정품 인증</h2>
-    <input id="uuidInput" type="text" placeholder="UUID 6자리를 입력하세요" />
-    <button onclick="verifyUUID()">정품 확인</button>
+    <h2>Polygon 블록체인 공식 인증 서비스</h2>
+    <input id="uuidInput" type="text" placeholder="카드 고유번호(UUID)를 입력하세요" />
+    <button onclick="verifyUUID()">인증하기</button>
     <div id="result"></div>
     <div id="verifyInfo">
-      본 서비스는 <strong>이더리움 기반 Polygon 블록체인</strong>을 활용한 정품 등록 및 검증 시스템입니다.<br>
-      <strong>위변조가 불가능하며,</strong> 모든 등록 내역은 <strong>블록체인에 영구 보관</strong>됩니다.<br>
+      본 서비스는 <strong>이더리움 네트워크 기반 Polygon 블록체인</strong>의<br>
+      <strong>공식 인증 시스템</strong>입니다. 등록된 내역은 위변조가 불가능하며,<br>
+      모든 기록이 <strong>블록체인에 영구 보관</strong>됩니다.
     </div>
   </div>
 
@@ -96,18 +97,19 @@
         const result = await contract.checkUUID(uuid);
 
         if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerText = "✅ 본 카드는 Polygon 블록체인에 등록된 정품입니다.";
+          resultBox.innerText = "✅ 해당 카드는 Polygon 블록체인에 공식 등록된 정품입니다.";
         } else {
-          resultBox.innerText = "❌ 본 카드는 Polygon 블록체인에 등록되지 않은 카드입니다.";
+          resultBox.innerText = "❌ 해당 카드는 Polygon 블록체인에 등록되지 않은 제품입니다.";
         }
       } catch (err) {
         console.error(err);
-        resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다.";
+        resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
       }
     }
   </script>
 </body>
 </html>
+
 
 
 
