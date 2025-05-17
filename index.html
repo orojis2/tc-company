@@ -1,95 +1,106 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Polygon 블록체인 공식 인증</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polygon CARD Authenticity</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: "Segoe UI", sans-serif;
-      background-image: url("background.jpg");
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a url("https://polygonscan.com/images/top-bg.svg") no-repeat top center;
       background-size: cover;
-      background-position: center;
+      color: #ffffff;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .logo {
+      margin-top: 40px;
+    }
+    .logo img {
+      height: 40px;
     }
     .container {
-      background: rgba(0, 0, 0, 0.75);
-      padding: 30px;
-      border-radius: 16px;
+      background: #151515;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
       text-align: center;
-      color: white;
-      max-width: 430px;
+      max-width: 420px;
       width: 100%;
+      margin-top: 20px;
+    }
+    h2 {
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #ffffff;
     }
     input {
-      padding: 12px;
-      width: 90%;
-      margin-bottom: 15px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
       border: none;
-      border-radius: 6px;
       font-size: 16px;
+      margin-bottom: 20px;
+      background: #222;
+      color: #fff;
     }
     button {
-      padding: 12px 25px;
+      padding: 14px;
+      width: 100%;
       font-size: 16px;
-      background-color: #a259ff;
+      background-color: #8247e5;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      margin-top: 10px;
+      font-weight: 600;
     }
     #result {
       margin-top: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      white-space: pre-wrap;
+      font-weight: 500;
+      color: #a3ffcc;
     }
-    #verifyInfo {
-      margin-top: 30px;
+    .footer {
+      margin-top: 60px;
       font-size: 12px;
-      color: #ccc;
-    }
-    #verifyInfo a {
-      color: #a259ff;
-      text-decoration: underline;
-      cursor: pointer;
+      color: #777;
     }
   </style>
 </head>
 <body>
+  <div class="logo">
+    <img src="https://cryptologos.cc/logos/polygon-matic-logo.png?v=032" alt="Polygon Logo">
+  </div>
   <div class="container">
-    <h2>Polygon 블록체인 공식 인증 서비스</h2>
-    <input id="uuidInput" type="text" placeholder="카드 고유번호(UUID)를 입력하세요" />
-    <button onclick="verifyUUID()">인증하기</button>
+    <h2>Polygon CARD Authenticity Check</h2>
+    <input id="uuidInput" type="text" placeholder="Enter your card's UUID" />
+    <button onclick="verifyUUID()">Verify</button>
     <div id="result"></div>
-    <div id="verifyInfo">
-      본 서비스는 <strong>이더리움 네트워크 기반 Polygon 블록체인</strong>의<br>
-      <strong>공식 인증 시스템</strong>입니다. 등록된 내역은 위변조가 불가능하며,<br>
-      모든 기록이 <strong>블록체인에 영구 보관</strong>됩니다.
-    </div>
+  </div>
+  <div class="footer">
+    Powered by Polygon Blockchain - Immutable Product Verification
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
     const contractAddress = "0x8A8D95C16122b738107D65fC0f7dD2CB2018fb3A";
-    const abi = [
-      "function checkUUID(string memory uuid) external view returns (string memory)"
-    ];
-
+    const abi = ["function checkUUID(string memory uuid) external view returns (string memory)"];
     const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
 
     async function verifyUUID() {
       const uuid = document.getElementById("uuidInput").value.trim();
       const resultBox = document.getElementById("result");
-      resultBox.innerText = "⏳ 인증 중...";
+      resultBox.innerText = "⏳ Verifying on blockchain...";
 
       if (!uuid) {
-        resultBox.innerText = "❗ UUID를 입력해주세요.";
+        resultBox.innerText = "❗ Please enter a UUID.";
         return;
       }
 
@@ -97,6 +108,19 @@
         const contract = new ethers.Contract(contractAddress, abi, provider);
         const result = await contract.checkUUID(uuid);
 
+        if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
+          resultBox.innerText = "✅ This card is officially registered on the Polygon blockchain.";
+        } else {
+          resultBox.innerText = "❌ This card is NOT registered on the Polygon blockchain.";
+        }
+      } catch (err) {
+        console.error(err);
+        resultBox.innerText = "⚠️ Error during verification. Please try again later.";
+      }
+    }
+  </script>
+</body>
+</html>
 
 
 
