@@ -76,7 +76,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0xbe6b7bcb6229a021e5703dc536502D1Dd8EfebcC";
+    const contractAddress = "0x8A8D95C16122b738107D65fC0f7dD2CB2018fb3A";
     const abi = [
       "function checkUUID(string memory uuid) external view returns (string memory)"
     ];
@@ -97,19 +97,6 @@
         const contract = new ethers.Contract(contractAddress, abi, provider);
         const result = await contract.checkUUID(uuid);
 
-        if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerText = "✅ 해당 카드는 Polygon 블록체인에 공식 등록된 정품입니다.";
-        } else {
-          resultBox.innerText = "❌ 해당 카드는 Polygon 블록체인에 등록되지 않은 제품입니다.";
-        }
-      } catch (err) {
-        console.error(err);
-        resultBox.innerText = "⚠️ 인증 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-      }
-    }
-  </script>
-</body>
-</html>
 
 
 
