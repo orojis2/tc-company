@@ -19,11 +19,12 @@
       justify-content: center;
       min-height: 100vh;
     }
-    .logo { margin-top: 40px; }
-    .logo img {
+    .logo {
+      width: 140px;
       height: 42px;
-      display: block;
-      margin: 0 auto;
+      background: url('https://polygonscan.com/images/svg/logo-white.svg') no-repeat center;
+      background-size: contain;
+      margin-top: 40px;
     }
     .container {
       background: #151515;
@@ -80,9 +81,7 @@
   </style>
 </head>
 <body>
-  <div class="logo">
-    <img src="https://polygonscan.com/images/svg/logo-white.svg" alt="PolygonScan Logo">
-  </div>
+  <div class="logo"></div>
   <div class="container">
     <h2>Polygon UUID 인증 시스템</h2>
     <input id="uuidInput" type="text" placeholder="인증할 UUID를 입력하세요">
