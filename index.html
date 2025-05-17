@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Polygon CARD Authenticity</title>
+  <title>Polygon UUID Authenticity Verification</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,8 +11,7 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #0a0a0a url("https://polygonscan.com/images/top-bg.svg") no-repeat top center;
-      background-size: cover;
+      background: #0a0a0a;
       color: #ffffff;
       display: flex;
       flex-direction: column;
@@ -76,16 +75,16 @@
 </head>
 <body>
   <div class="logo">
-    <img src="https://cryptologos.cc/logos/polygon-matic-logo.png?v=032" alt="Polygon Logo">
+    <img src="polygon-logo.png" alt="Polygon Logo">
   </div>
   <div class="container">
-    <h2>Polygon CARD Authenticity Check</h2>
-    <input id="uuidInput" type="text" placeholder="Enter your card's UUID" />
+    <h2>Polygon UUID Authenticity Verification</h2>
+    <input id="uuidInput" type="text" placeholder="Enter UUID for verification" />
     <button onclick="verifyUUID()">Verify</button>
     <div id="result"></div>
   </div>
   <div class="footer">
-    Powered by Polygon Blockchain - Immutable Product Verification
+    Powered by Polygon Blockchain - Immutable UUID Authentication System
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
@@ -109,9 +108,9 @@
         const result = await contract.checkUUID(uuid);
 
         if (result === "VALID" || result.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerText = "✅ This card is officially registered on the Polygon blockchain.";
+          resultBox.innerText = "✅ This UUID is officially registered on the Polygon blockchain.";
         } else {
-          resultBox.innerText = "❌ This card is NOT registered on the Polygon blockchain.";
+          resultBox.innerText = "❌ This UUID is NOT registered on the Polygon blockchain.";
         }
       } catch (err) {
         console.error(err);
@@ -121,7 +120,6 @@
   </script>
 </body>
 </html>
-
 
 
 
