@@ -136,7 +136,7 @@
         const res = await contract.checkUUID(uuid);
 
         if (res === "VALID" || res.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerHTML = `✅ 이 UUID는 Polygon 블록체인에 공식 등록된 항목입니다.`;
+          resultBox.innerHTML = `✅ 이 UUID는 Polygon 블록체인에 공식 등록된 코드입니다.`;
         } else {
           resultBox.innerText = "❌ 이 UUID는 블록체인에 등록되지 않았습니다.";
         }
