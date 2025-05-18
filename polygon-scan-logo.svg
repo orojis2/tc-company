@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- PolygonScan 공식 로고 SVG 파일 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 50">
-  <path fill="#8247E5" d="M33.6 0l-33.6 19.4v11.2l33.6 19.4 33.6-19.4V19.4L33.6 0z"/>
-  <path fill="#8247E5" d="M33.6 5l28.5 16.4v8L33.6 45 5.1 29.4v-8L33.6 5z" opacity="0.3"/>
-</svg>
