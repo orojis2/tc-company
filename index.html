@@ -11,7 +11,6 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      /* 배경색을 연한 그레이(#f5f5f5)로 변경 */
       background: #f5f5f5;
       color: #333333;
       display: flex;
@@ -28,7 +27,6 @@
       margin-top: 40px;
     }
     .container {
-      /* 컨테이너 배경을 화이트로 변경하고 그림자 연하게 조절 */
       background: #ffffff;
       padding: 40px;
       border-radius: 12px;
@@ -91,20 +89,22 @@
     <div id="result"></div>
   </div>
   <div class="footer">
-    폴리곤 인증 시스템은 이더리움 기반의 폴리곤 체인을 이용하여 검증을 수행하므로 위변조가 불가능하며, 모든 정보는 블록체인 상에 영구적으로 보존됩니다.<br>
-    PolygonScan 공식 홈페이지에서도 인증 데이터를 직접 확인하실 수 있습니다. <a href="https://polygonscan.com" target="_blank">여기를 클릭하세요</a>.<br>
+    폴리곤 인증 시스템은 이더리움 기반의 폴리곤 체인을 이용하여 검증을 수행하므로 위변조가 불가능하며,<br>
+    모든 정보는 블록체인 상에 영구적으로 보존됩니다.<br>
+    이 인증 시스템은 Polygon 블록체인과 직접 연동되어 있으며,<br>
+    결과는 위변조가 불가능한 정식 블록체인 기반 데이터에 의해 실시간으로 제공됩니다.
     <div class="help-link" onclick="showHelp()">🔍 검증 방법 보기</div>
   </div>
 
   <div id="helpModal" class="modal-overlay" onclick="hideHelp()">
     <div class="modal" onclick="event.stopPropagation()">
       <h3>검증 방법 안내</h3>
-      <ol style="text-align:left;">
-        <li>인증 후 결과 영역에 표시된 <code>트랜잭션 해시</code>를 복사합니다.</li>
-        <li>브라우저에서 <a href="https://polygonscan.com" target="_blank">polygonscan.com</a> 에 접속합니다.</li>
-        <li>페이지 상단 검색창에 복사한 해시를 붙여넣고 검색 버튼을 클릭합니다.</li>
-        <li>트랜잭션 상세 페이지에서 <strong>상태 (성공/실패)</strong> 및 <strong>블록 번호</strong>를 확인합니다.</li>
-      </ol>
+      <p style="text-align:left;">
+        카드에 기재된 UUID를 입력하고 [인증하기] 버튼을 누르면,<br>
+        Polygon 블록체인과 직접 연동된 시스템을 통해<br>
+        등록 여부를 실시간으로 검증합니다.<br><br>
+        별도의 외부 사이트 없이 이 페이지에서 결과를 바로 확인할 수 있습니다.
+      </p>
       <button class="close-btn" onclick="hideHelp()">닫기</button>
     </div>
   </div>
@@ -130,7 +130,7 @@
         const res = await contract.checkUUID(uuid);
 
         if (res === "VALID" || res.startsWith("ALREADY VERIFIED")) {
-          resultBox.innerHTML = `✅ 이 UUID는 Polygon 블록체인에 공식 등록된 항목입니다.<br><small>트랜잭션 해시: <code>${res.substring(res.lastIndexOf('0x')) || ''}</code></small>`;
+          resultBox.innerHTML = `✅ 이 UUID는 Polygon 블록체인에 공식 등록된 항목입니다.`;
         } else {
           resultBox.innerText = "❌ 이 UUID는 블록체인에 등록되지 않았습니다.";
         }
@@ -149,7 +149,6 @@
   </script>
 </body>
 </html>
-
 
 
 
